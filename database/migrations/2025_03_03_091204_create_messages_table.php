@@ -17,8 +17,8 @@ return new class extends Migration
             $table->foreignId('sender_id')->constrained('employees')->onDelete('cascade');
             $table->text('text');
             $table->integer('type');
-            $table->boolean('is_sent');
-            $table->boolean('is_seen');
+            $table->boolean('is_sent')->default('true');
+            $table->boolean('is_seen')->default('false');
             $table->softDeletes();
             $table->timestamps();
         });

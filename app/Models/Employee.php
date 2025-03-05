@@ -13,4 +13,8 @@ class Employee extends Authenticatable
     protected $fillable = ['name', 'password', 'department_id', 'account_type'];
 
     //protected $hidden = ['password'];
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
 }

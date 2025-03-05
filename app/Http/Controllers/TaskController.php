@@ -36,7 +36,7 @@ class TaskController extends Controller
     
         // Construire la liste des superviseurs
         $supervisors = $validated['supervisors_ids'] ?? [];
-        if ($headOfDepartment && !in_array($headOfDepartment->id, $supervisors)) {
+        if ($headOfDepartment && $headOfDepartment->id != $employee->id && !in_array($headOfDepartment->id, $supervisors)) {
             $supervisors[] = $headOfDepartment->id;
         }
     
@@ -71,10 +71,19 @@ class TaskController extends Controller
         return response()->json(['message' => 'Task deleted']);
     }
 
-        public function getTasksByEmployee($employee_id)
+        public function getNotValidateTasksByEmployee($employee_id)
     {
         // Récupère les tâches associées à l'employé donné
-        $tasks = Task::where('employee_id', $employee_id)->get();
+        $tasks = Task::where('employee_id', $employee_id)->where('validated',0)->orderBy('created_at','desc')->get();
+
+        // Retourne les tâches sous forme de ressource
+
+        return response()->json(TaskResource::collection($tasks)); 
+    }
+    public function getValidatedTasksByEmployee($employee_id)
+    {
+        // Récupère les tâches associées à l'employé donné
+        $tasks = Task::where('employee_id', $employee_id)->where('validated',1)->orderBy('created_at','desc')->get();
 
         // Retourne les tâches sous forme de ressource
 

@@ -59,4 +59,10 @@ class EmployeeController extends Controller
         
         return response()->json(EmployeeResource::collection($employees));
     }
+    public function getHeadsOfDepartments()
+    {
+        $heads = Employee::with('department')->where('account_type', 1)->get();
+
+        return response()->json(EmployeeResource::collection($heads), 200);
+    }
 }

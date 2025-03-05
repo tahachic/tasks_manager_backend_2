@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Auth;
 
 use App\Models\Message;
 use Illuminate\Http\Request;
@@ -20,13 +21,10 @@ class MessageController extends Controller
             'text' => 'required|string',
             'type' => 'required|integer',
             'sender_id' => 'required|exists:employees,id',
-            'sender_name' => 'required|string',
-            'is_sent' => 'required|boolean',
-            'is_seen' => 'required|boolean',
         ]);
 
         $message = Message::create($request->all());
-        return response()->json($message, 201);
+        return response()->json(new MessageResource(Message::with('employee')->findOrFail($message->id)), 201);
     }
 
     public function show($id)
@@ -57,5 +55,18 @@ class MessageController extends Controller
     // Retourne la liste des messages sous forme de ressource
     //return MessageResource::collection($messages);
     return response()-> json(MessageResource::collection($messages));
+}
+public function markOtherMessagesAsSeen($task_id)
+{
+    $employee_id = Auth::id(); // Récupérer l'ID de l'utilisateur connecté
+
+    // Mettre à jour uniquement les messages envoyés par une autre personne
+    Message::where('task_id', $task_id)
+           ->where('sender_id', '!=', $employee_id) // Exclure les messages envoyés par l'utilisateur
+           ->update(['is_seen' => true]);
+
+    return response()->json([
+        'message' => 'Les messages des autres ont été marqués comme vus.'
+    ], 200);
 }
 }
