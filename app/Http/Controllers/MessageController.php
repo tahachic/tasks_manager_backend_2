@@ -25,12 +25,11 @@ class MessageController extends Controller
         ]);
 
         $message = Message::create($request->all());
-        // $task = Task::findOrFail($validated['task_id']);
-        // if ($task->employee_id == $validated['sender_id']) {
-        //     # code...
-        // }else{
-        //     FirebaseHelper::sendWithCurl('employee_'.$task->employee_id,"رسالة جديدة",$validated['text']);
-        // }
+
+        $task = Task::findOrFail($request->task_id);
+       
+        FirebaseHelper::sendWithCurl('employee_'.$task->employee_id,"رسالة جديدة",$request->text);
+        Log::error('employee_'.$task->employee_id);
    
         return response()->json(new MessageResource(Message::with('employee')->findOrFail($message->id)), 201);
     }
