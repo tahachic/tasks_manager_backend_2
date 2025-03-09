@@ -9,6 +9,7 @@ use App\Http\Controllers\DailyTaskController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\NotificationController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -21,17 +22,17 @@ use App\Http\Controllers\ReportController;
 */
 
 
+Route::middleware('auth:sanctum')->post('/store-token', [NotificationController::class, 'storeToken']);
+
+Route::apiResource('departments', DepartmentController::class)->middleware('auth:sanctum');
+Route::apiResource('employees', EmployeeController::class)->middleware('auth:sanctum');
+Route::apiResource('tasks', TaskController::class)->middleware('auth:sanctum');
+Route::apiResource('daily_tasks', DailyTaskController::class)->middleware('auth:sanctum');
+Route::apiResource('messages', MessageController::class)->middleware('auth:sanctum');
 
 
-Route::apiResource('departments', DepartmentController::class);
-Route::apiResource('employees', EmployeeController::class);
-Route::apiResource('tasks', TaskController::class);
-Route::apiResource('daily_tasks', DailyTaskController::class);
-Route::apiResource('messages', MessageController::class);
-
-
-Route::get('/tasks/not_validated/employee/{employee_id}', [TaskController::class, 'getNotValidateTasksByEmployee']);
-Route::get('/tasks/validated/employee/{employee_id}', [TaskController::class, 'getValidatedTasksByEmployee']);
+Route::get('/tasks/not_validated/employee/{employee_id}', [TaskController::class, 'getNotValidateTasksByEmployee'])->middleware('auth:sanctum');
+Route::get('/tasks/validated/employee/{employee_id}', [TaskController::class, 'getValidatedTasksByEmployee'])->middleware('auth:sanctum');
 
 Route::get('/daily-tasks/employee/{employee_id}', [DailyTaskController::class, 'getDailyTasksByEmployee'])->middleware('auth:sanctum');
 
@@ -44,8 +45,14 @@ Route::get('/messages/task/{task_id}', [MessageController::class, 'getMessagesBy
 Route::post('/sign_in', [AuthController::class, 'signIn']);
 Route::post('/sign_out', [AuthController::class, 'signOut'])->middleware('auth:sanctum');
 
-Route::get('/employee-report/{employee_id}', [ReportController::class, 'generateEmployeeReport']);
+Route::get('/employee-report/{employee_id}', [ReportController::class, 'generateEmployeeReport'])->middleware('auth:sanctum');
 
-Route::put('seen/messages/tasks/{task_id}', [MessageController::class, 'markOtherMessagesAsSeen']);
+Route::put('seen/messages/tasks/{task_id}', [MessageController::class, 'markOtherMessagesAsSeen'])->middleware('auth:sanctum');
 
-Route::get('/heads-of-departments', [EmployeeController::class, 'getHeadsOfDepartments']);
+Route::get('/heads-of-departments', [EmployeeController::class, 'getHeadsOfDepartments'])->middleware('auth:sanctum');
+
+Route::get('/supervised_tasks', [TaskController::class, 'getSupervisedTasks'])->middleware('auth:sanctum');
+
+Route::post('/send-notification/employee/{id}', [NotificationController::class, 'sendNotificationToEmployee']);
+Route::post('/send-notification/department/{id}', [NotificationController::class, 'sendNotificationToDepartment']);
+Route::post('/send-notification/employees', [NotificationController::class, 'sendNotificationToAll']);

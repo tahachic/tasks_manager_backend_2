@@ -14,6 +14,7 @@ class TaskResource extends JsonResource
             'title' => $this->title,
             'supervisor' => $this->getFirstSupervisorName(),
             'employee_id' => $this->employee_id,
+            'employee_name'=> $this->getEmployeeName(),
             'supervisors_ids' => $this->supervisors_ids,
             'validated' => $this->validated,
             'priority' => $this->priority,
@@ -29,5 +30,11 @@ class TaskResource extends JsonResource
             return Employee::where('id', $firstSupervisorId)->value('name'); // ✅ Récupère le nom
         }
         return null; // Si aucun superviseur, retourne `null`
+    }
+    private function getEmployeeName()
+    {
+       $id= $this->employee_id;
+       return Employee::where('id',$id)->value('name'); // ✅ Récupère le nom
+       
     }
 }

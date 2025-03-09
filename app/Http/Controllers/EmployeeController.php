@@ -29,7 +29,7 @@ class EmployeeController extends Controller
             'account_type' => $request->account_type
         ]);
 
-        return response()->json($employee, 201);
+        return response()->json(new EmployeeResource($employee), 201);
     }
 
     public function show($id)
@@ -41,7 +41,7 @@ class EmployeeController extends Controller
     {
         $employee = Employee::findOrFail($id);
         $employee->update($request->all());
-        return response()->json($employee);
+        return response()->json(new EmployeeResource($employee));
     }
 
     public function destroy($id)

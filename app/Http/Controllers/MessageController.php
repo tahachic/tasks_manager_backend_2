@@ -6,7 +6,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Message;
 use Illuminate\Http\Request;
 use App\Http\Resources\MessageResource;
-
+use App\Helpers\FirebaseHelper;
+use App\Models\Task;
 class MessageController extends Controller
 {
     public function index()
@@ -24,6 +25,13 @@ class MessageController extends Controller
         ]);
 
         $message = Message::create($request->all());
+        // $task = Task::findOrFail($validated['task_id']);
+        // if ($task->employee_id == $validated['sender_id']) {
+        //     # code...
+        // }else{
+        //     FirebaseHelper::sendWithCurl('employee_'.$task->employee_id,"رسالة جديدة",$validated['text']);
+        // }
+   
         return response()->json(new MessageResource(Message::with('employee')->findOrFail($message->id)), 201);
     }
 

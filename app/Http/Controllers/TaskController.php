@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Resources\TaskResource;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Employee;
+use App\Helpers\FirebaseHelper;
 class TaskController extends Controller
 {
     public function index()
@@ -48,6 +49,7 @@ class TaskController extends Controller
             'priority' => $validated['priority'] ?? 0,
             'status' => $validated['status'] ?? 0,
         ]);
+        FirebaseHelper::sendWithCurl('employee_'.$validated['employee_id'],"مهمة جديدة",$validated['title']);
        
         // $task = Task::create($request->all());
         return response()->json(new TaskResource($task), 201);
@@ -62,6 +64,7 @@ class TaskController extends Controller
     {
         $task = Task::findOrFail($id);
         $task->update($request->all());
+      //  FirebaseHelper::sendWithCurl('employee_'.$task->employee_id,"مهمة جديدة",$task->title);
         return response()->json(new TaskResource($task));
     }
 
@@ -88,5 +91,18 @@ class TaskController extends Controller
         // Retourne les tâches sous forme de ressource
 
         return response()->json(TaskResource::collection($tasks)); 
+    }
+    public function getSupervisedTasks()
+    {
+        $user = Auth::user(); // Récupérer l'utilisateur connecté
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Rechercher les tâches où l'ID de l'utilisateur est dans supervisors_ids
+        //$tasks = Task::whereJsonContains('supervisors_ids', (string) $user->id)->get();
+        $tasks = Task::whereRaw("supervisors_ids::jsonb @> ?", [json_encode([$user->id])])->where('validated',0)->orderBy('created_at','desc')->get();
+        return response()->json(TaskResource::collection($tasks), 200);
     }
 }
