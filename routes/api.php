@@ -45,7 +45,8 @@ Route::get('/messages/task/{task_id}', [MessageController::class, 'getMessagesBy
 Route::post('/sign_in', [AuthController::class, 'signIn']);
 Route::post('/sign_out', [AuthController::class, 'signOut'])->middleware('auth:sanctum');
 
-Route::get('/employee-report/{employee_id}', [ReportController::class, 'generateEmployeeReport'])->middleware('auth:sanctum');
+Route::get('/employee-report/daily/{employee_id}', [ReportController::class, 'generateDailyEmployeeReport']);
+Route::get('/employee-report/monthly/{employee_id}', [ReportController::class, 'generateMonthlyEmployeeReport'])->middleware('auth:sanctum');
 
 Route::put('seen/messages/tasks/{task_id}', [MessageController::class, 'markOtherMessagesAsSeen'])->middleware('auth:sanctum');
 
@@ -56,3 +57,5 @@ Route::get('/supervised_tasks', [TaskController::class, 'getSupervisedTasks'])->
 Route::post('/send-notification/employee/{id}', [NotificationController::class, 'sendNotificationToEmployee']);
 Route::post('/send-notification/department/{id}', [NotificationController::class, 'sendNotificationToDepartment']);
 Route::post('/send-notification/employees', [NotificationController::class, 'sendNotificationToAll']);
+
+Route::get('/report/{employee_id}', [ReportController::class, 'generateMonthlyEmployeeReport']);
