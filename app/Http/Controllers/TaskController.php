@@ -73,6 +73,48 @@ class TaskController extends Controller
         Task::destroy($id);
         return response()->json(['message' => 'Task deleted']);
     }
+    public function storeMultiple(Request $request)
+{
+    $validated = $request->validate([
+        'title' => 'required|string',
+        'employees_ids' => 'required|array',
+        'employees_ids.*' => 'exists:employees,id',
+        'validated' => 'required|integer',
+        'priority' => 'required|integer',
+        'status' => 'required|integer'
+    ]);
+
+    $tasks = [];
+
+    foreach ($validated['employees_ids'] as $employee_id) {
+        $employee = Employee::findOrFail($employee_id);
+
+        // Récupérer le chef du département
+        $headOfDepartment = Employee::where('department_id', $employee->department_id)
+                                    ->where('account_type', 1)
+                                    ->first();
+    
+        // Construire la liste des superviseurs
+        $supervisors = [];
+        if ($headOfDepartment) {
+            $supervisors[] = $headOfDepartment->id;
+        }
+
+        // Créer la tâche
+        $task = Task::create([
+            'title' => $validated['title'],
+            'employee_id' => $employee_id,
+            'supervisors_ids' => json_encode($supervisors), // Stocker en JSON
+            'validated' => $validated['validated'],
+            'priority' => $validated['priority'],
+            'status' => $validated['status'],
+        ]);
+
+        $tasks[] = $task;
+    }
+
+    return response()->json($tasks, 201);
+}
 
         public function getNotValidateTasksByEmployee($employee_id)
     {

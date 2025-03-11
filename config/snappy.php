@@ -35,15 +35,26 @@ return [
     
     'pdf' => [
         'enabled' => true,
-        'binary'  => env('WKHTML_PDF_BINARY', '/usr/local/bin/wkhtmltopdf'),
+        'binary'  => env('WKHTML_PDF_BINARY', '"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"'),
         'timeout' => false,
-        'options' => [],
+        'options' => [
+            'enable-local-file-access' => true,
+            'keep-relative-links' => true,
+            'disable-external-links' => false,
+            'enable-internal-links' => true,
+            'orientation' => 'portrait',
+            'page-size' => 'A4',
+            'margin-top'    => 5,
+            'margin-right'  => 5,
+            'margin-bottom' => 5,
+            'margin-left'   => 5,
+        ],
         'env'     => [],
     ],
     
     'image' => [
         'enabled' => true,
-        'binary'  => env('WKHTML_IMG_BINARY', '/usr/local/bin/wkhtmltoimage'),
+        'binary'  => env('WKHTML_IMG_BINARY', '"C:\Program Files\wkhtmltopdf\bin\wkhtmltoimage.exe"'),
         'timeout' => false,
         'options' => [],
         'env'     => [],

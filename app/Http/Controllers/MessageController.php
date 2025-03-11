@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 
 use App\Models\Message;
+use App\Models\Employee;
 use Illuminate\Http\Request;
 use App\Http\Resources\MessageResource;
 use App\Helpers\FirebaseHelper;
@@ -25,12 +26,37 @@ class MessageController extends Controller
         ]);
 
         $message = Message::create($request->all());
-
+        
         $task = Task::findOrFail($request->task_id);
-       
-        FirebaseHelper::sendWithCurl('employee_'.$task->employee_id,"رسالة جديدة",$request->text);
-        Log::error('employee_'.$task->employee_id);
-   
+        $sender = Employee::findOrFail($request->sender_id); // Récupérer l'expéditeur
+
+        // Liste des destinataires
+        $recipients = [];
+    
+        // Ajouter l'employé de la tâche si ce n'est pas l'expéditeur
+        if ($task->employee_id != $request->sender_id) {
+            $recipients[] = 'employee_' . $task->employee_id;
+        }
+    
+        // Vérifier si supervisors_ids est un tableau ou une chaîne JSON
+        $supervisors = is_array($task->supervisors_ids) 
+            ? $task->supervisors_ids 
+            : json_decode($task->supervisors_ids, true);
+    
+        // Ajouter les superviseurs en excluant l'expéditeur
+        if (is_array($supervisors)) {
+            foreach ($supervisors as $supervisor_id) {
+                if ($supervisor_id != $request->sender_id) {
+                    $recipients[] = 'employee_' . $supervisor_id;
+                }
+            }
+        }
+    
+        // Envoyer la notification à chaque destinataire
+        foreach ($recipients as $recipient) {
+            FirebaseHelper::sendWithCurl($recipient, "{$sender->name}", $request->text);
+        }
+        
         return response()->json(new MessageResource(Message::with('employee')->findOrFail($message->id)), 201);
     }
 

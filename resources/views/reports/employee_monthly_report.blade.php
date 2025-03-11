@@ -31,34 +31,36 @@
     </style>
 </head>
 <body>
-    
-    @if($employee)
-        <h2>التقرير اليومي الخاص ب{{ $employee->name }}</h2>
-        <p>المعرف: {{ $employee->id }}</p>
-        <p>القسم: {{ $employee->department->name ?? 'Non défini' }}</p>
-    @else
-        <p>لا يوجد موظف</p>
-    @endif
 
-    <h3>قائمة المهام الدائمة</h3>
-    <table>
-        <tr>
-            <th>#</th>
-            <th>العنوان</th>
-        </tr>
-        @forelse($dailyTasks as $task)
-        <tr>
-            <td>{{ $task->id }}</td>
-            <td>{{ $task->title }}</td>
-        </tr>
-        @empty
-        <tr>
-            <td colspan="2">لا توجد مهام حاليا</td>
-        </tr>
-        @endforelse
-    </table>
+            @if($employee)
+                <h2>التقرير اليومي الخاص ب{{ $employee->name }}</h2>
+                <p>المعرف: {{ $employee->id }}</p>
+                <p>القسم: {{ $employee->department->name ?? 'Non défini' }}</p>
+            @else
+                <p>لا يوجد موظف</p>
+            @endif
 
-    <h3>قائمة المهام المسندة</h3>
+    @foreach($tasksByDay as $date => $tasks)
+        <div class="page-break"></div> <!-- Nouvelle page pour chaque jour -->
+        <h3>قائمة المهام الدائمة</h3>
+        <table>
+            <tr>
+                <th>#</th>
+                <th>العنوان</th>
+            </tr>
+            @forelse($dailyTasks as $task)
+            <tr>
+                <td>{{ $task->id }}</td>
+                <td>{{ $task->title }}</td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="2">لا توجد مهام حاليا</td>
+            </tr>
+            @endforelse
+        </table>
+    <h3>قائمة المهام المسندة ليوم {{ $date }}</h3>
+        
     <table>
         <tr>
             <th>#</th>
@@ -87,5 +89,8 @@
         </tr>
         @endforelse
     </table>
+    @endforeach
+
 </body>
+
 </html>

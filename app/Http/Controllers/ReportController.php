@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Task;
+use App\Models\DailyTask;
 use App\Models\Employee;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
@@ -22,22 +23,16 @@ class ReportController extends Controller
     $today = Carbon::today()->toDateString();
 
     // Récupérer les tâches du jour pour cet employé
-    $dailyTasks = Task::where('employee_id', $employee_id)
-                      ->whereDate('created_at', $today)
+    $dailyTasks = DailyTask::where('employee_id', $employee_id)
+                      
                       ->get();
 
     // Récupérer toutes les tâches de cet employé
-    $allTasks = Task::where('employee_id', $employee_id)->get();
+    $tasks = Task::where('employee_id', $employee_id)->whereDate('created_at', $today)->get();
+    //return View('reports.employee_report', compact('employee', 'dailyTasks', 'tasks'));
     // Générer un PDF avec ces données
-    $pdf = PDF::loadView('reports.employee_report',  compact('employee', 'dailyTasks', 'allTasks'));
-        //return $pdf->inline();
-    return $pdf->download('employee_report_' . $employee_id . '_' . $today . '.pdf');
-    $pdf = Pdf::loadView('reports.employee_report', compact('employee', 'dailyTasks', 'allTasks'));
-    $pdf->setOption('defaultFont', 'Cairo');
-    
-    
-    //$pdf = Pdf::loadView('reports.employee_report', compact('employee', 'dailyTasks', 'allTasks'));
-
+    $pdf = PDF::loadView('reports.employee_report', compact('employee', 'dailyTasks', 'tasks'));
+   
     // Sauvegarder le PDF dans storage/app/public/reports
     $fileName = 'employee_report_' . $employee_id . '_' . $today . '.pdf';
     Storage::disk('public')->put('reports/' . $fileName, $pdf->output());
@@ -50,35 +45,33 @@ class ReportController extends Controller
 }
 public function generateMonthlyEmployeeReport($employee_id)
 {
-    // Vérifier si l'employé existe
     $employee = Employee::find($employee_id);
     if (!$employee) {
         return response()->json(['error' => 'Employé non trouvé'], 404);
     }
 
-    // Date du jour
-    $today = Carbon::today()->toDateString();
-
+    // Obtenir le mois et l'année actuels
+    $currentMonth = Carbon::now()->month;
+    $currentYear = Carbon::now()->year;
     // Récupérer les tâches du jour pour cet employé
-    $dailyTasks = Task::where('employee_id', $employee_id)
-                      ->whereDate('created_at', $today)
-                      ->get();
+    $dailyTasks = DailyTask::where('employee_id', $employee_id)->get();
 
-    // Récupérer toutes les tâches de cet employé
-    $allTasks = Task::where('employee_id', $employee_id)->get();
-    $pdf = PDF::loadView('shared/facture_prof', compact('order'));
-    //return $pdf->inline();
-    return $pdf->download('Shahri_N'.$order->code.'.pdf');
-   // return View('reports.employee_report', compact('employee', 'dailyTasks', 'allTasks'));
-    // Générer un PDF avec ces données
-    $pdf = Pdf::loadView('reports.employee_report', compact('employee', 'dailyTasks', 'allTasks'));
-    $pdf->setOption('defaultFont', 'Amiri');
-    
-    
-    //$pdf = Pdf::loadView('reports.employee_report', compact('employee', 'dailyTasks', 'allTasks'));
+
+    // Récupérer les tâches de chaque jour du mois pour cet employé
+    $tasksByDay = Task::where('employee_id', $employee_id)
+                      ->whereYear('created_at', $currentYear)
+                      ->whereMonth('created_at', $currentMonth)
+                      ->orderBy('created_at')
+                      ->get()
+                      ->groupBy(function ($task) {
+                          return Carbon::parse($task->created_at)->format('Y-m-d');
+                      });
+
+    // Générer le PDF avec les tâches de chaque jour sur une nouvelle page
+    $pdf = PDF::loadView('reports.employee_monthly_report', compact('employee','dailyTasks', 'tasksByDay'));
 
     // Sauvegarder le PDF dans storage/app/public/reports
-    $fileName = 'employee_report_' . $employee_id . '_' . $today . '.pdf';
+    $fileName = 'employee_report_' . $employee_id . '_' . $currentMonth . '.pdf';
     Storage::disk('public')->put('reports/' . $fileName, $pdf->output());
 
     // Retourner l'URL du fichier généré

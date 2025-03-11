@@ -46,7 +46,7 @@ Route::post('/sign_in', [AuthController::class, 'signIn']);
 Route::post('/sign_out', [AuthController::class, 'signOut'])->middleware('auth:sanctum');
 
 Route::get('/employee-report/daily/{employee_id}', [ReportController::class, 'generateDailyEmployeeReport']);
-Route::get('/employee-report/monthly/{employee_id}', [ReportController::class, 'generateMonthlyEmployeeReport'])->middleware('auth:sanctum');
+Route::get('/employee-report/monthly/{employee_id}', [ReportController::class, 'generateMonthlyEmployeeReport']);
 
 Route::put('seen/messages/tasks/{task_id}', [MessageController::class, 'markOtherMessagesAsSeen'])->middleware('auth:sanctum');
 
