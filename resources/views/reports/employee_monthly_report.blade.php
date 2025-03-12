@@ -1,95 +1,143 @@
 <!DOCTYPE html>
 <html lang="ar">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>التقرير اليومي</title>
+    <title>التقرير الشهري</title>
+
+    <!-- Load Bootstrap Locally -->
+    <link href="{{ public_path('bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+
     <style>
         @font-face {
-            font-family: Cairo;
-         /* src: url("{{ asset('fonts/Cairo-Regular.ttf') }}"); */
-            
+            font-family: 'Cairo';
+            src: url("{{ asset('fonts/Cairo-Regular.ttf') }}") format('truetype'),
+                 url("{{ asset('fonts/Cairo-Bold.ttf') }}") format('truetype');
+            font-weight: normal;
+            font-style: normal;
         }
+
         body {
-            font-family: Cairo;
+            font-family: 'Cairo', sans-serif;
             direction: rtl;
             text-align: right;
+            background-color: #f8f9fa;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
+
+        .container {
+            background: white;
+            padding: 20px;
             margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
         }
-        th, td {
-            border: 1px solid #000;
-            padding: 8px;
-            text-align: right;
-        }
-        th {
-            background-color: #f2f2f2;
+
+        .page-break {
+            page-break-before: always;
         }
     </style>
 </head>
+
 <body>
 
-            @if($employee)
-                <h2>التقرير اليومي الخاص ب{{ $employee->name }}</h2>
-                <p>المعرف: {{ $employee->id }}</p>
-                <p>القسم: {{ $employee->department->name ?? 'Non défini' }}</p>
-            @else
-                <p>لا يوجد موظف</p>
-            @endif
+<div class="container">
 
-    @foreach($tasksByDay as $date => $tasks)
-        <div class="page-break"></div> <!-- Nouvelle page pour chaque jour -->
-        <h3>قائمة المهام الدائمة</h3>
-        <table>
-            <tr>
-                <th>#</th>
-                <th>العنوان</th>
-            </tr>
-            @forelse($dailyTasks as $task)
-            <tr>
-                <td>{{ $task->id }}</td>
-                <td>{{ $task->title }}</td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="2">لا توجد مهام حاليا</td>
-            </tr>
-            @endforelse
+    @foreach ($tasksByDay as $date => $tasks)
+        @if (!$loop->first)
+            <div class="page-break"></div>
+        @endif
+
+        @if ($employee)
+            <div class="mb-4 text-center">
+                <h2 class="text-primary">التقرير اليومي الخاص ب{{ $employee->name }}</h2>
+                <p><strong>المعرف:</strong> {{ $employee->id }}</p>
+                <p><strong>القسم:</strong> {{ $employee->department->name ?? 'غير محدد' }}</p>
+            </div>
+        @else
+            <p class="alert alert-warning text-center">لا يوجد موظف</p>
+        @endif
+
+        <!-- قائمة المهام الدائمة -->
+        <h3 class="mt-4 text-secondary">قائمة المهام الدائمة</h3>
+        <table class="table table-striped table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>العنوان</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($dailyTasks as $task)
+                    <tr>
+                        <td>{{ $task->id }}</td>
+                        <td>{{ $task->title }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="2" class="text-center">لا توجد مهام حاليا</td>
+                    </tr>
+                @endforelse
+            </tbody>
         </table>
-    <h3>قائمة المهام المسندة ليوم {{ $date }}</h3>
-        
-    <table>
-        <tr>
-            <th>#</th>
-            <th>العنوان</th>
-            <th>الحالة</th>
-            <th>الأولوية</th>
-            <th>تاريخ الإنشاء</th>
-            <th>مصادق عليها</th>
-        </tr>
-        @forelse($tasks as $task)
-        <tr>
-            <td>{{ $task->id }}</td>
-            <td>{{ $task->title }}</td>
-            <td>{{ $task->status == 0 ? "قيد الإنتظار" : 
-                ($task->status == 1 ? "قيد الإنجاز" : 
-                ($task->status == 2 ? "مشكل" : 
-                ($task->status == 3 ? "تم الإنجاز" : "غير محدد"))) }}</td>
-            <td>{{ $task->priority == 0 ? "غير مستعجلة" : "مستعجلة" 
-                }}</td>
-            <td>{{ $task->created_at->format('d/m/Y H:i') }}</td>
-            <td>{{ $task->validated ==0 ? 'لا':'نعم' }}</td>
-        </tr>
-        @empty
-        <tr>
-            <td colspan="6">لا توجد مهام</td>
-        </tr>
-        @endforelse
-    </table>
+
+        <!-- قائمة المهام ليوم معين -->
+        <h3 class="mt-4 text-success">قائمة المهام المسندة ليوم {{ $date }}</h3>
+        <table class="table table-striped table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>العنوان</th>
+                    <th>الحالة</th>
+                    <th>الأولوية</th>
+                    <th>تاريخ الإنشاء</th>
+                    <th>مصادق عليها</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($tasks as $task)
+                    <tr>
+                        <td>{{ $task->id }}</td>
+                        <td>{{ $task->title }}</td>
+                        <td>
+                            @switch($task->status)
+                                @case(0) <span class="badge bg-warning">قيد الإنتظار</span> @break
+                                @case(1) <span class="badge bg-primary">قيد الإنجاز</span> @break
+                                @case(2) <span class="badge bg-danger">مشكل</span> @break
+                                @case(3) <span class="badge bg-success">تم الإنجاز</span> @break
+                                @default <span class="badge bg-secondary">غير محدد</span>
+                            @endswitch
+                        </td>
+                        <td>
+                            @if ($task->priority == 0)
+                                <span class="badge bg-secondary">غير مستعجلة</span>
+                            @else
+                                <span class="badge bg-danger">مستعجلة</span>
+                            @endif
+                        </td>
+                        <td>{{ $task->created_at->format('d/m/Y H:i') }}</td>
+                        <td>
+                            @if ($task->validated == 0)
+                                <span class="badge bg-danger">لا</span>
+                            @else
+                                <span class="badge bg-success">نعم</span>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" class="text-center">لا توجد مهام</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+
     @endforeach
+
+</div>
+
+<!-- Load Bootstrap JS Locally -->
+<script src="{{ public_path('bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 
 </body>
 

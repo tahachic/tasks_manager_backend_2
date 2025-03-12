@@ -10,7 +10,7 @@ class Message extends Model
 {
     use HasFactory , SoftDeletes;
     
-    protected $fillable = ['task_id', 'sender_id', 'text', 'type', 'is_sent', 'is_seen'];
+    protected $fillable = ['task_id', 'sender_id', 'text', 'type', 'is_sent', 'is_seen','url'];
 
     public function task()
     {

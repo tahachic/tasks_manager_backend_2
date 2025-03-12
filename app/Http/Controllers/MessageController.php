@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Http\Resources\MessageResource;
 use App\Helpers\FirebaseHelper;
 use App\Models\Task;
+use Illuminate\Support\Facades\Storage;
 class MessageController extends Controller
 {
     public function index()
@@ -23,16 +24,28 @@ class MessageController extends Controller
             'text' => 'required|string',
             'type' => 'required|integer',
             'sender_id' => 'required|exists:employees,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $message = Message::create($request->all());
+        // Handle image upload
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imagePath = $image->store('messages_images', 'public'); // Store the image in the 'profile_images' directory in the 'public' disk
+        }
+
+        $message = Message::create([
+            'task_id' => $request->input("task_id"),
+            'text' =>  $imagePath ? Storage::url($imagePath) : $request->input("text"),
+            'type' => $request->input("type"),
+            'sender_id' => $request->input("sender_id"),
+        ]);
         
         $task = Task::findOrFail($request->task_id);
         $sender = Employee::findOrFail($request->sender_id); // Récupérer l'expéditeur
 
         // Liste des destinataires
         $recipients = [];
-    
         // Ajouter l'employé de la tâche si ce n'est pas l'expéditeur
         if ($task->employee_id != $request->sender_id) {
             $recipients[] = 'employee_' . $task->employee_id;

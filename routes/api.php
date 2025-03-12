@@ -28,7 +28,7 @@ Route::apiResource('departments', DepartmentController::class)->middleware('auth
 Route::apiResource('employees', EmployeeController::class)->middleware('auth:sanctum');
 Route::apiResource('tasks', TaskController::class)->middleware('auth:sanctum');
 Route::apiResource('daily_tasks', DailyTaskController::class)->middleware('auth:sanctum');
-Route::apiResource('messages', MessageController::class)->middleware('auth:sanctum');
+Route::apiResource('messages', MessageController::class);
 
 
 Route::get('/tasks/not_validated/employee/{employee_id}', [TaskController::class, 'getNotValidateTasksByEmployee'])->middleware('auth:sanctum');
@@ -46,7 +46,7 @@ Route::post('/sign_in', [AuthController::class, 'signIn']);
 Route::post('/sign_out', [AuthController::class, 'signOut'])->middleware('auth:sanctum');
 
 Route::get('/employee-report/daily/{employee_id}', [ReportController::class, 'generateDailyEmployeeReport']);
-Route::get('/employee-report/monthly/{employee_id}', [ReportController::class, 'generateMonthlyEmployeeReport']);
+Route::get('/employee-report/monthly/{employee_id}', [ReportController::class, 'generateDailyEmployeeReport']);
 
 Route::put('seen/messages/tasks/{task_id}', [MessageController::class, 'markOtherMessagesAsSeen'])->middleware('auth:sanctum');
 
