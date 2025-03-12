@@ -49,7 +49,7 @@ class TaskController extends Controller
             'priority' => $validated['priority'] ?? 0,
             'status' => $validated['status'] ?? 0,
         ]);
-       // FirebaseHelper::sendWithCurl('employee_'.$validated['employee_id'],"مهمة جديدة",$validated['title']);
+       FirebaseHelper::sendWithCurl('employee_'.$validated['employee_id'],"مهمة جديدة",$validated['title']);
        
         // $task = Task::create($request->all());
         return response()->json(new TaskResource($task), 201);
