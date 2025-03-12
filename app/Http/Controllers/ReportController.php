@@ -66,7 +66,7 @@ public function generateMonthlyEmployeeReport($employee_id)
                       ->groupBy(function ($task) {
                           return Carbon::parse($task->created_at)->format('Y-m-d');
                       });
-    return View('reports.employee_monthly_report', compact('employee','dailyTasks', 'tasksByDay'));
+    //return View('reports.employee_monthly_report', compact('employee','dailyTasks', 'tasksByDay'));
     // Générer le PDF avec les tâches de chaque jour sur une nouvelle page
     $pdf = PDF::loadView('reports.employee_monthly_report', compact('employee','dailyTasks', 'tasksByDay'))->setOptions([
         'enable-local-file-access' => true,
