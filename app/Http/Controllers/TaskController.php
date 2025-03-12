@@ -30,7 +30,7 @@ class TaskController extends Controller
 
         $employee = Employee::findOrFail($validated['employee_id']);
 
-        // Récupérer le chef du département (premier employé avec account_type = 1)
+        // Rï¿½cupï¿½rer le chef du dï¿½partement (premier employï¿½ avec account_type = 1)
         $headOfDepartment = Employee::where('department_id', $employee->department_id)
                                     ->where('account_type', 1)
                                     ->first();
@@ -49,7 +49,7 @@ class TaskController extends Controller
             'priority' => $validated['priority'] ?? 0,
             'status' => $validated['status'] ?? 0,
         ]);
-        FirebaseHelper::sendWithCurl('employee_'.$validated['employee_id'],"???? ?????",$validated['title']);
+        FirebaseHelper::sendWithCurl('employee_'.$validated['employee_id'],"Ù…Ù‡Ù…Ø© Ø¬Ø¯ÙŠØ¯Ø©",$validated['title']);
        
         // $task = Task::create($request->all());
         return response()->json(new TaskResource($task), 201);
@@ -89,7 +89,7 @@ class TaskController extends Controller
     foreach ($validated['employees_ids'] as $employee_id) {
         $employee = Employee::findOrFail($employee_id);
 
-        // Récupérer le chef du département
+        // Rï¿½cupï¿½rer le chef du dï¿½partement
         $headOfDepartment = Employee::where('department_id', $employee->department_id)
                                     ->where('account_type', 1)
                                     ->first();
@@ -100,7 +100,7 @@ class TaskController extends Controller
             $supervisors[] = $headOfDepartment->id;
         }
 
-        // Créer la tâche
+        // Crï¿½er la tï¿½che
         $task = Task::create([
             'title' => $validated['title'],
             'employee_id' => $employee_id,
@@ -118,31 +118,31 @@ class TaskController extends Controller
 
         public function getNotValidateTasksByEmployee($employee_id)
     {
-        // Récupère les tâches associées à l'employé donné
+        // Rï¿½cupï¿½re les tï¿½ches associï¿½es ï¿½ l'employï¿½ donnï¿½
         $tasks = Task::where('employee_id', $employee_id)->where('validated',0)->orderBy('created_at','desc')->get();
 
-        // Retourne les tâches sous forme de ressource
+        // Retourne les tï¿½ches sous forme de ressource
 
         return response()->json(TaskResource::collection($tasks)); 
     }
     public function getValidatedTasksByEmployee($employee_id)
     {
-        // Récupère les tâches associées à l'employé donné
+        // Rï¿½cupï¿½re les tï¿½ches associï¿½es ï¿½ l'employï¿½ donnï¿½
         $tasks = Task::where('employee_id', $employee_id)->where('validated',1)->orderBy('created_at','desc')->get();
 
-        // Retourne les tâches sous forme de ressource
+        // Retourne les tï¿½ches sous forme de ressource
 
         return response()->json(TaskResource::collection($tasks)); 
     }
     public function getSupervisedTasks()
     {
-        $user = Auth::user(); // Récupérer l'utilisateur connecté
+        $user = Auth::user(); // Rï¿½cupï¿½rer l'utilisateur connectï¿½
 
         if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        // Rechercher les tâches où l'ID de l'utilisateur est dans supervisors_ids
+        // Rechercher les tï¿½ches oï¿½ l'ID de l'utilisateur est dans supervisors_ids
         //$tasks = Task::whereJsonContains('supervisors_ids', (string) $user->id)->get();
         $tasks = Task::whereRaw("supervisors_ids::jsonb @> ?", [json_encode([$user->id])])->where('validated',0)->orderBy('created_at','desc')->get();
         return response()->json(TaskResource::collection($tasks), 200);
