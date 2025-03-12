@@ -30,7 +30,7 @@ class TaskController extends Controller
 
         $employee = Employee::findOrFail($validated['employee_id']);
 
-        // RÃ©cupÃ©rer le chef du dÃ©partement (premier employÃ© avec account_type = 1)
+        // Récupérer le chef du département (premier employé avec account_type = 1)
         $headOfDepartment = Employee::where('department_id', $employee->department_id)
                                     ->where('account_type', 1)
                                     ->first();
@@ -49,7 +49,7 @@ class TaskController extends Controller
             'priority' => $validated['priority'] ?? 0,
             'status' => $validated['status'] ?? 0,
         ]);
-       FirebaseHelper::sendWithCurl('employee_'.$validated['employee_id'],"Ù…Ù‡Ù…Ø© Ø¬Ø¯ÙŠØ¯Ø©",$validated['title']);
+        FirebaseHelper::sendWithCurl('employee_'.$validated['employee_id'],"???? ?????",$validated['title']);
        
         // $task = Task::create($request->all());
         return response()->json(new TaskResource($task), 201);
@@ -64,7 +64,7 @@ class TaskController extends Controller
     {
         $task = Task::findOrFail($id);
         $task->update($request->all());
-      //  FirebaseHelper::sendWithCurl('employee_'.$task->employee_id,"Ù…Ù‡Ù…Ø© Ø¬Ø¯ÙŠØ¯Ø©",$task->title);
+      //  FirebaseHelper::sendWithCurl('employee_'.$task->employee_id,"???? ?????",$task->title);
         return response()->json(new TaskResource($task));
     }
 
@@ -89,7 +89,7 @@ class TaskController extends Controller
     foreach ($validated['employees_ids'] as $employee_id) {
         $employee = Employee::findOrFail($employee_id);
 
-        // RÃ©cupÃ©rer le chef du dÃ©partement
+        // Récupérer le chef du département
         $headOfDepartment = Employee::where('department_id', $employee->department_id)
                                     ->where('account_type', 1)
                                     ->first();
@@ -100,7 +100,7 @@ class TaskController extends Controller
             $supervisors[] = $headOfDepartment->id;
         }
 
-        // CrÃ©er la tÃ¢che
+        // Créer la tâche
         $task = Task::create([
             'title' => $validated['title'],
             'employee_id' => $employee_id,
@@ -118,31 +118,31 @@ class TaskController extends Controller
 
         public function getNotValidateTasksByEmployee($employee_id)
     {
-        // RÃ©cupÃ¨re les tÃ¢ches associÃ©es Ã  l'employÃ© donnÃ©
+        // Récupère les tâches associées à l'employé donné
         $tasks = Task::where('employee_id', $employee_id)->where('validated',0)->orderBy('created_at','desc')->get();
 
-        // Retourne les tÃ¢ches sous forme de ressource
+        // Retourne les tâches sous forme de ressource
 
         return response()->json(TaskResource::collection($tasks)); 
     }
     public function getValidatedTasksByEmployee($employee_id)
     {
-        // RÃ©cupÃ¨re les tÃ¢ches associÃ©es Ã  l'employÃ© donnÃ©
+        // Récupère les tâches associées à l'employé donné
         $tasks = Task::where('employee_id', $employee_id)->where('validated',1)->orderBy('created_at','desc')->get();
 
-        // Retourne les tÃ¢ches sous forme de ressource
+        // Retourne les tâches sous forme de ressource
 
         return response()->json(TaskResource::collection($tasks)); 
     }
     public function getSupervisedTasks()
     {
-        $user = Auth::user(); // RÃ©cupÃ©rer l'utilisateur connectÃ©
+        $user = Auth::user(); // Récupérer l'utilisateur connecté
 
         if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        // Rechercher les tÃ¢ches oÃ¹ l'ID de l'utilisateur est dans supervisors_ids
+        // Rechercher les tâches où l'ID de l'utilisateur est dans supervisors_ids
         //$tasks = Task::whereJsonContains('supervisors_ids', (string) $user->id)->get();
         $tasks = Task::whereRaw("supervisors_ids::jsonb @> ?", [json_encode([$user->id])])->where('validated',0)->orderBy('created_at','desc')->get();
         return response()->json(TaskResource::collection($tasks), 200);
