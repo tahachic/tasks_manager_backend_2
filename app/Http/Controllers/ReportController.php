@@ -33,6 +33,7 @@ class ReportController extends Controller
    // return View('reports.employee_report', compact('employee', 'dailyTasks', 'tasks'));
     // Générer un PDF avec ces données
     $pdf = PDF::loadView('reports.employee_report', compact('employee', 'dailyTasks', 'tasks'));
+    return $pdf->stream('employee_report_'.$employee_id.'.pdf');
     return $pdf->download('employee_report_'.$employee_id.'.pdf');
     // Sauvegarder le PDF dans storage/app/public/reports
     $fileName = 'employee_report_' . $employee_id . '_' . $today . '.pdf';
@@ -73,7 +74,8 @@ public function generateMonthlyEmployeeReport($employee_id)
     $pdf = PDF::loadView('reports.employee_monthly_report', compact('employee','dailyTasks', 'tasksByDay'))->setOptions([
         'enable-local-file-access' => true,
     ]);
-    return $pdf->download('rapport_'.$currentMonth.'.$employee_.'.$employee_id.'.pdf');
+    return $pdf->stream('rapport_'.$currentMonth.'.employee_'.$employee_id.'.pdf');
+    return $pdf->download('rapport_'.$currentMonth.'.employee_'.$employee_id.'.pdf');
     // Sauvegarder le PDF dans storage/app/public/reports
     $fileName = 'rapport_'.$currentMonth.'.$employee_.'.$employee_id.'.pdf';
     Storage::disk('public')->put('reports/' . $fileName, $pdf->output());
