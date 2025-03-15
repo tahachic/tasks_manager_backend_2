@@ -10,7 +10,7 @@ class Task extends Model
 {
     use HasFactory , SoftDeletes;
     
-    protected $fillable = ['title', 'employee_id', 'supervisors_ids', 'validated', 'priority', 'status'];
+    protected $fillable = ['title', 'employee_id', 'supervisors_ids', 'validated', 'priority', 'status','validated_at'];
     protected $casts = [
         'supervisors_ids' => 'array', // ✅ Convertit JSON <-> Tableau PHP
     ];

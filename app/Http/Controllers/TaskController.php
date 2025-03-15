@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Resources\TaskResource;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Employee;
+use Carbon\Carbon;
 use App\Helpers\FirebaseHelper;
 class TaskController extends Controller
 {
@@ -61,13 +62,19 @@ class TaskController extends Controller
     }
 
     public function update(Request $request, $id)
-    {
-        $task = Task::findOrFail($id);
-        $task->update($request->all());
-      //  FirebaseHelper::sendWithCurl('employee_'.$task->employee_id,"???? ?????",$task->title);
-        return response()->json(new TaskResource($task));
+{
+    $task = Task::findOrFail($id);
+
+    // Check if the 'validated' field is present in the request
+    if ($request->has('validated')) {
+        $task->validated_at = $request->validated == 1 ? Carbon::now() : null;
     }
 
+    // Update the task with other request data
+    $task->update($request->all());
+
+    return response()->json(new TaskResource($task));
+}
     public function destroy($id)
     {
         Task::destroy($id);
@@ -147,4 +154,5 @@ class TaskController extends Controller
         $tasks = Task::whereRaw("supervisors_ids::jsonb @> ?", [json_encode([$user->id])])->where('validated',0)->orderBy('created_at','desc')->get();
         return response()->json(TaskResource::collection($tasks), 200);
     }
+    
 }

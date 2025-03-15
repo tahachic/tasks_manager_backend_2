@@ -34,6 +34,7 @@ Route::apiResource('messages', MessageController::class);
 Route::get('/tasks/not_validated/employee/{employee_id}', [TaskController::class, 'getNotValidateTasksByEmployee'])->middleware('auth:sanctum');
 Route::get('/tasks/validated/employee/{employee_id}', [TaskController::class, 'getValidatedTasksByEmployee'])->middleware('auth:sanctum');
 
+
 Route::get('/daily-tasks/employee/{employee_id}', [DailyTaskController::class, 'getDailyTasksByEmployee'])->middleware('auth:sanctum');
 
 Route::get('/employees/department/{department_id}', [EmployeeController::class, 'getEmployeesByDepartment'])->middleware('auth:sanctum');
