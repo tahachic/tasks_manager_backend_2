@@ -28,7 +28,7 @@ Route::apiResource('departments', DepartmentController::class)->middleware('auth
 Route::apiResource('employees', EmployeeController::class)->middleware('auth:sanctum');
 Route::apiResource('tasks', TaskController::class)->middleware('auth:sanctum');
 Route::apiResource('daily_tasks', DailyTaskController::class)->middleware('auth:sanctum');
-Route::apiResource('messages', MessageController::class);
+Route::apiResource('messages', MessageController::class)->middleware('auth:sanctum');
 
 
 Route::get('/tasks/not_validated/employee/{employee_id}', [TaskController::class, 'getNotValidateTasksByEmployee'])->middleware('auth:sanctum');
@@ -58,5 +58,3 @@ Route::get('/supervised_tasks', [TaskController::class, 'getSupervisedTasks'])->
 Route::post('/send-notification/employee/{id}', [NotificationController::class, 'sendNotificationToEmployee']);
 Route::post('/send-notification/department/{id}', [NotificationController::class, 'sendNotificationToDepartment']);
 Route::post('/send-notification/employees', [NotificationController::class, 'sendNotificationToAll']);
-
-Route::get('/report/{employee_id}', [ReportController::class, 'generateMonthlyEmployeeReport']);

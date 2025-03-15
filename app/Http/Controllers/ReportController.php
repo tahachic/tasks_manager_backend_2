@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use PDF;
 class ReportController extends Controller
 {
+
     public function generateDailyEmployeeReport($employee_id)
 {
     // Vérifier si l'employé existe
@@ -29,10 +30,10 @@ class ReportController extends Controller
 
     // Récupérer toutes les tâches de cet employé
     $tasks = Task::where('employee_id', $employee_id)->whereDate('created_at', $today)->get();
-    //return View('reports.employee_report', compact('employee', 'dailyTasks', 'tasks'));
+   // return View('reports.employee_report', compact('employee', 'dailyTasks', 'tasks'));
     // Générer un PDF avec ces données
     $pdf = PDF::loadView('reports.employee_report', compact('employee', 'dailyTasks', 'tasks'));
-   
+    return $pdf->download('employee_report_'.$employee_id.'.pdf');
     // Sauvegarder le PDF dans storage/app/public/reports
     $fileName = 'employee_report_' . $employee_id . '_' . $today . '.pdf';
     Storage::disk('public')->put('reports/' . $fileName, $pdf->output());
@@ -43,6 +44,7 @@ class ReportController extends Controller
         'download_url' => asset('storage/reports/' . $fileName)
     ]);
 }
+
 public function generateMonthlyEmployeeReport($employee_id)
 {
     $employee = Employee::find($employee_id);
@@ -71,9 +73,9 @@ public function generateMonthlyEmployeeReport($employee_id)
     $pdf = PDF::loadView('reports.employee_monthly_report', compact('employee','dailyTasks', 'tasksByDay'))->setOptions([
         'enable-local-file-access' => true,
     ]);
-
+    return $pdf->download('rapport_'.$currentMonth.'.$employee_.'.$employee_id.'.pdf');
     // Sauvegarder le PDF dans storage/app/public/reports
-    $fileName = 'employee_report_' . $employee_id . '_' . $currentMonth . '.pdf';
+    $fileName = 'rapport_'.$currentMonth.'.$employee_.'.$employee_id.'.pdf';
     Storage::disk('public')->put('reports/' . $fileName, $pdf->output());
 
     // Retourner l'URL du fichier généré

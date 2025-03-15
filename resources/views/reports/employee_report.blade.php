@@ -7,7 +7,8 @@
     <style>
         @font-face {
             font-family: Cairo;
-         /* src: url("{{ asset('fonts/Cairo-Regular.ttf') }}"); */
+          /* src: url("{{ asset('fonts/Cairo-Regular.ttf') }}");  */
+         /* src: url("{{ asset('fonts/Montserrat-Arabic/Montserrat-Arabic-Regular.ttf') }}"); */
             
         }
         body {
